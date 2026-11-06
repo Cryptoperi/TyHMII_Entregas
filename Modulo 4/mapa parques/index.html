@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parques Industriales de Mendoza – M4A1</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: "Segoe UI", Arial, sans-serif; }
+  #map { position: absolute; inset: 0; }
+  .titulo { background: rgba(255,255,255,.95); padding: 8px 12px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,.3); max-width: 300px; }
+  .titulo h1 { font-size: 15px; margin: 0 0 3px; color: #123a5c; }
+  .titulo p { font-size: 12px; margin: 0; color: #445; }
+  .leyenda { background: rgba(255,255,255,.95); padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.7; box-shadow: 0 1px 5px rgba(0,0,0,.3); }
+  .leyenda i { display: inline-block; width: 16px; height: 11px; margin-right: 6px; vertical-align: middle; }
+  .popup b { color: #123a5c; }
+  .popup td { padding: 1px 6px 1px 0; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data/departamentos.js"></script>
+<script src="data/voronoi.js"></script>
+<script src="data/delaunay.js"></script>
+<script src="data/parques_poligonos.js"></script>
+<script src="data/parques_puntos.js"></script>
+<script>
+const map = L.map('map', { center: [-33.01, -68.56], zoom: 10 });
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Esri World Imagery' });
+const base = L.imageOverlay('data/mapa_base_parques.png', [[-33.3864100, -69.0842150], [-32.6350828, -68.0265527]], { opacity: 0.85 });
+
+const fmt = v => (v === null || v === undefined) ? 's/d' : Number(v).toLocaleString('es-AR');
+const popup = p => `<div class="popup"><b>${p.nom}</b><table>
+  <tr><td>Tipo</td><td>${p.tipo}</td></tr><tr><td>Departamento</td><td>${p.depto}</td></tr>
+  <tr><td>Superficie</td><td>${fmt(p.sup_ha)} ha</td></tr></table></div>`;
+
+const deptos = L.geoJSON(departamentos, { style: { color: '#e69500', weight: 1.5, fill: false },
+  onEachFeature: (f, l) => l.bindTooltip(f.properties.depto, { sticky: true }) }).addTo(map);
+const vor = L.geoJSON(voronoi, { style: { color: '#2a6fb0', weight: 1.2, dashArray: '5 4', fillColor: '#3478b4', fillOpacity: 0.08 },
+  onEachFeature: (f, l) => l.bindPopup(`<div class="popup"><b>Área de influencia</b><br>${f.properties.nom}<br>${fmt(f.properties.area_km2)} km²</div>`) }).addTo(map);
+const del = L.geoJSON(delaunay, { style: { color: '#7a3fa0', weight: 1.5 },
+  onEachFeature: (f, l) => l.bindTooltip(`${fmt(f.properties.dist_km)} km`, { sticky: true }) }).addTo(map);
+const pols = L.geoJSON(parques_poligonos, { style: { color: '#a83200', weight: 1, fillColor: '#ff5a00', fillOpacity: 0.85 },
+  onEachFeature: (f, l) => l.bindPopup(popup(f.properties)) }).addTo(map);
+const pts = L.geoJSON(parques_puntos, {
+  pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 6, color: '#fff', weight: 1.5, fillColor: '#c0392b', fillOpacity: 1 }),
+  onEachFeature: (f, l) => { l.bindPopup(popup(f.properties)); l.bindTooltip(String(f.properties.id), { permanent: true, direction: 'right', className: '' }); } }).addTo(map);
+
+map.fitBounds(deptos.getBounds());
+L.control.layers({ 'OpenStreetMap': osm, 'Satélite (Esri)': sat }, {
+  'Mapa base de la cátedra (raster)': base, 'Departamentos': deptos, 'Polígonos de Voronoi': vor,
+  'Triangulación de Delaunay': del, 'Parques (polígonos)': pols, 'Parques (puntos)': pts }, { collapsed: false }).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
+
+const t = L.control({ position: 'topleft' });
+t.onAdd = () => { const d = L.DomUtil.create('div', 'titulo'); d.innerHTML = '<h1>Parques y zonas industriales – Mendoza</h1><p>TyHM II · Módulo 4 · Actividad 1 · Grupo 2</p>'; return d; };
+t.addTo(map);
+const ley = L.control({ position: 'bottomright' });
+ley.onAdd = () => { const d = L.DomUtil.create('div', 'leyenda'); d.innerHTML =
+  '<i style="background:#c0392b;border-radius:50%;width:11px"></i>Parque / zona (punto)<br>' +
+  '<i style="background:#ff5a00"></i>Superficie industrial<br>' +
+  '<i style="border-top:2px dashed #2a6fb0;height:0"></i>Voronoi (área de influencia)<br>' +
+  '<i style="border-top:2px solid #7a3fa0;height:0"></i>Delaunay (vecindad)<br>' +
+  '<i style="border-top:2px solid #e69500;height:0"></i>Departamentos'; return d; };
+ley.addTo(map);
+</script>
+</body>
+</html>

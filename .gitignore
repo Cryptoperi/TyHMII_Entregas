@@ -1,0 +1,7 @@
+.claude/
+*.aux.xml
+__pycache__/
+# Fotos originales del M3 (pesadas): se publican solo las copias de fotos_web/
+Modulo 3/fotos/*
+!Modulo 3/fotos/LEEME.txt
+Modulo 3/informe_fotografia.html

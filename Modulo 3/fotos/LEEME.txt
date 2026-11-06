@@ -1,0 +1,2 @@
+Copia aca las fotos originales (del celular o la camara, no de WhatsApp) con la convencion NN_plano_descripcion.jpg
+Luego ejecuta: python generar_informe.py

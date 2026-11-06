@@ -17,8 +17,8 @@ Autor de este repositorio: **Raimundo Glasner**
 
 | Módulo | Tema | Estado |
 |---|---|---|
-| [Módulo 1](Modulo%201/) | Toma de decisiones | En preparación |
-| [Módulo 2](Modulo%202/) | Informe Post-JoSEII 2026 – Delegación Mendoza | ✅ Entregado |
-| [Módulo 3](Modulo%203/) | Taller de fotografía técnica | En preparación |
-| [Módulo 4](Modulo%204/) | Sistemas de Información Geográfica (QGIS) | En preparación |
-| [Módulo 5](Modulo%205/) | Dinámica de sistemas (Vensim) | ✅ Modelo base |
+| [Módulo 1](Modulo%201/) | Toma de decisiones: selección del tema del Trabajo Final | ✅ Informe PDF |
+| [Módulo 2](Modulo%202/) | Informe Post-JoSEII 2026 – Delegación Mendoza | ✅ Informe PDF |
+| [Módulo 3](Modulo%203/) | Taller de fotografía técnica | 📷 Pendiente: fotos |
+| [Módulo 4](Modulo%204/) | QGIS: parques industriales y cobertura de nieve | ✅ Proyectos + [mapa 1](https://cryptoperi.github.io/TyHMII_Entregas/Modulo%204/mapa%20parques/index.html) + [mapa 2](https://cryptoperi.github.io/TyHMII_Entregas/Modulo%204/mapa%20nieve/index.html) |
+| [Módulo 5](Modulo%205/) | Dinámica de sistemas: modelo presa-depredador con escenario STEP | ✅ Modelos Vensim + análisis |

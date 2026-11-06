@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cobertura de Nieve – Valle de las Lágrimas – M4A2</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: "Segoe UI", Arial, sans-serif; }
+  #map { position: absolute; inset: 0; }
+  .panel { background: rgba(255,255,255,.95); padding: 9px 12px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,.3); font-size: 12px; max-width: 290px; }
+  .panel h1 { font-size: 15px; margin: 0 0 4px; color: #123a5c; }
+  .panel table { border-collapse: collapse; margin-top: 6px; width: 100%; }
+  .panel td, .panel th { border-bottom: 1px solid #dde; padding: 3px 4px; text-align: right; }
+  .panel td:first-child, .panel th:first-child { text-align: left; }
+  .leyenda i { display: inline-block; width: 16px; height: 11px; margin-right: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data/resultados.js"></script>
+<script src="data/nieve_2024.js"></script>
+<script src="data/nieve_2026.js"></script>
+<script>
+const map = L.map('map', { center: [-34.763, -70.282], zoom: 12 });
+const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap, SRTM | OpenTopoMap' }).addTo(map);
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' });
+const r24 = L.imageOverlay('data/sentinel2_2024.jpg', resultados['2024'].rgb_bounds);
+const r26 = L.imageOverlay('data/sentinel2_2026.jpg', resultados['2026'].rgb_bounds);
+const fmt = v => Number(v).toLocaleString('es-AR', { maximumFractionDigits: 1 });
+const pop = p => `<b>Nieve ${p.anio}</b><br>Fecha: ${p.fecha}<br>Superficie: ${fmt(p.area_ha)} ha`;
+const n24 = L.geoJSON(nieve_2024, { style: { color: '#1f5fa8', weight: 1, fillColor: '#4a90d9', fillOpacity: 0.45 }, onEachFeature: (f, l) => l.bindPopup(pop(f.properties)) }).addTo(map);
+const n26 = L.geoJSON(nieve_2026, { style: { color: '#b0306a', weight: 1, fillColor: '#e05a9a', fillOpacity: 0.30 }, onEachFeature: (f, l) => l.bindPopup(pop(f.properties)) });
+const area = L.rectangle(resultados['2024'].rgb_bounds, { color: '#222', weight: 2, fill: false, dashArray: '6 4' }).addTo(map);
+L.marker([-34.7628, -70.2821]).bindPopup('<b>Valle de las Lágrimas</b><br>Malargüe, Mendoza').addTo(map);
+map.fitBounds(area.getBounds());
+L.control.layers({ 'Topográfico': topo, 'OpenStreetMap': osm }, {
+  'Sentinel-2 color verdadero 2024': r24, 'Sentinel-2 color verdadero 2026': r26,
+  'Nieve 2024': n24, 'Nieve 2026': n26, 'Área de estudio (20 × 20 km)': area }, { collapsed: false }).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
+const p = L.control({ position: 'topleft' });
+p.onAdd = () => { const d = L.DomUtil.create('div', 'panel'); const a = resultados['2024'], b = resultados['2026'];
+  d.innerHTML = `<h1>Cobertura de nieve – Valle de las Lágrimas</h1>TyHM II · Módulo 4 · Actividad 2 · Grupo 2
+  <table><tr><th></th><th>${a.fecha}</th><th>${b.fecha}</th></tr>
+  <tr><td>Nieve (ha)</td><td>${fmt(a.poligono_ha)}</td><td>${fmt(b.poligono_ha)}</td></tr>
+  <tr><td>% del área</td><td>${fmt(100*a.poligono_ha/a.area_total_ha)} %</td><td>${fmt(100*b.poligono_ha/b.area_total_ha)} %</td></tr>
+  <tr><td>Nubes excluidas (ha)</td><td>${fmt(a.nubes_ha)}</td><td>${fmt(b.nubes_ha)}</td></tr></table>
+  <p style="margin:6px 0 0"><b>Variación: +${fmt(resultados.variacion_ha)} ha (+${fmt(resultados.variacion_pct)} %)</b></p>
+  <div class="leyenda" style="margin-top:6px"><i style="background:#4a90d9;opacity:.7"></i>Nieve 2024 &nbsp; <i style="background:#e05a9a;opacity:.6"></i>Nieve 2026</div>`;
+  return d; };
+p.addTo(map);
+</script>
+</body>
+</html>
